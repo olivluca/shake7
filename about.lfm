@@ -1,0 +1,48 @@
+object AboutForm: TAboutForm
+  Left = 371
+  Height = 348
+  Top = 169
+  Width = 413
+  HorzScrollBar.Page = 412
+  VertScrollBar.Page = 347
+  BorderIcons = [biSystemMenu]
+  BorderStyle = bsDialog
+  Caption = 'About shake7'
+  ClientHeight = 348
+  ClientWidth = 413
+  Position = poMainFormCenter
+  LCLVersion = '0.9.25'
+  object Memo1: TMemo
+    Left = 8
+    Height = 290
+    Top = 8
+    Width = 396
+    Lines.Strings = (
+      'Lock/Unlock simatic step7 blocks (Know How Protection)'
+      ''
+      'Copyright (C) 2008 Luca Olivetti <luca@ventoso.org>'
+      ''
+      'This source is free software; you can redistribute it and/or modify it under the terms of the GNU General Public License as published by the Free Software Foundation; either version 3 of the License, or (at your option) any later version.'
+      ''
+      'This code is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU General Public License for more details.'
+      ''
+      'A copy of the GNU General Public License is available on the World Wide Web at <http://www.gnu.org/copyleft/gpl.html>. You can also obtain it by writing to the Free Software Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.'
+    )
+    OnChange = Memo1Change
+    ReadOnly = True
+    TabOrder = 1
+    TabStop = False
+  end
+  object BitBtn1: TBitBtn
+    Left = 160
+    Height = 30
+    Top = 309
+    Width = 75
+    Caption = '&OK'
+    Default = True
+    Kind = bkOK
+    ModalResult = 1
+    NumGlyphs = 0
+    TabOrder = 0
+  end
+end
