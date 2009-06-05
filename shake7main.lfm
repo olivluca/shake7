@@ -544,11 +544,12 @@ object shake7mainform: Tshake7mainform
     0000
   }
   Menu = MainMenu1
+  OnCloseQuery = FormCloseQuery
   OnCreate = FormCreate
-  ParentFont = False
   Position = poScreenCenter
-  LCLVersion = '0.9.26'
+  LCLVersion = '0.9.27'
   object Label4: TLabel
+    Left = 0
     Height = 17
     Top = 192
     Width = 99
@@ -563,6 +564,7 @@ object shake7mainform: Tshake7mainform
     ParentFont = False
   end
   object Label5: TLabel
+    Left = 0
     Height = 17
     Top = 56
     Width = 48
@@ -616,7 +618,9 @@ object shake7mainform: Tshake7mainform
     ParentFont = False
   end
   object Bevel1: TBevel
+    Left = 0
     Height = 5
+    Top = 0
     Width = 451
     Align = alTop
     Shape = bsTopLine
@@ -630,6 +634,7 @@ object shake7mainform: Tshake7mainform
     Shape = bsBottomLine
   end
   object FoldersGrid: TDBGrid
+    Left = 0
     Height = 108
     Top = 72
     Width = 448
@@ -665,11 +670,7 @@ object shake7mainform: Tshake7mainform
         FieldName = 'ANZOB'
       end>
     DataSource = FolderSource
-    FixedColor = clBtnFace
-    FixedHotColor = cl3DLight
     Options = [dgTitles, dgIndicator, dgColumnResize, dgColLines, dgRowLines, dgRowSelect, dgAlwaysShowSelection, dgConfirmDelete, dgCancelOnExit]
-    OptionsExtra = [dgeAutoColumns, dgeCheckboxColumn]
-    ParentColor = False
     ReadOnly = True
     Scrollbars = ssAutoBoth
     TabOrder = 0
@@ -677,6 +678,7 @@ object shake7mainform: Tshake7mainform
     TitleFont.Name = 'MS Sans Serif'
   end
   object BlocksGrid: TDBGrid
+    Left = 0
     Height = 195
     Top = 208
     Width = 450
@@ -712,11 +714,7 @@ object shake7mainform: Tshake7mainform
         FieldName = 'VersionDisplay'
       end>
     DataSource = BlocksSource
-    FixedColor = clBtnFace
-    FixedHotColor = cl3DLight
     Options = [dgTitles, dgIndicator, dgColumnResize, dgColLines, dgRowLines, dgRowSelect, dgAlwaysShowSelection, dgConfirmDelete, dgCancelOnExit, dgMultiselect]
-    OptionsExtra = [dgeAutoColumns, dgeCheckboxColumn]
-    ParentColor = False
     ReadOnly = True
     Scrollbars = ssAutoBoth
     TabOrder = 1
@@ -776,49 +774,130 @@ object shake7mainform: Tshake7mainform
     Style = csDropDownList
     TabOrder = 3
   end
+  object ShowOB: TCheckBox
+    Left = 112
+    Height = 17
+    Top = 191
+    Width = 35
+    Caption = 'OB'
+    Checked = True
+    OnClick = ShowTypeClick
+    State = cbChecked
+    TabOrder = 4
+  end
+  object ShowDB: TCheckBox
+    Left = 152
+    Height = 17
+    Top = 191
+    Width = 35
+    Caption = 'DB'
+    Checked = True
+    OnClick = ShowTypeClick
+    State = cbChecked
+    TabOrder = 5
+  end
+  object ShowFC: TCheckBox
+    Left = 192
+    Height = 17
+    Top = 191
+    Width = 33
+    Caption = 'FC'
+    Checked = True
+    OnClick = ShowTypeClick
+    State = cbChecked
+    TabOrder = 6
+  end
+  object ShowFB: TCheckBox
+    Left = 232
+    Height = 17
+    Top = 191
+    Width = 33
+    Caption = 'FB'
+    Checked = True
+    OnClick = ShowTypeClick
+    State = cbChecked
+    TabOrder = 7
+  end
   object Folders: TDbf
+    Exclusive = True
     IndexDefs = <>
     ReadOnly = True
     TableName = 'bstcntof.dbf'
     TableLevel = 4
+    FilterOptions = []
     AfterScroll = FoldersAfterScroll
     left = 48
     top = 104
     object FoldersID: TFloatField
       DisplayWidth = 10
+      FieldKind = fkData
       FieldName = 'ID'
+      Index = 0
+      LookupCache = False
       ProviderFlags = [pfInUpdate, pfInWhere]
+      ReadOnly = False
+      Required = False
+      MaxValue = 0
+      MinValue = 0
     end
     object FoldersNAME: TStringField
       DisplayWidth = 24
+      FieldKind = fkData
       FieldName = 'NAME'
       Index = 1
+      LookupCache = False
       ProviderFlags = [pfInUpdate, pfInWhere]
+      ReadOnly = False
+      Required = False
       Size = 24
     end
     object FoldersANZFB: TFloatField
       DisplayWidth = 10
+      FieldKind = fkData
       FieldName = 'ANZFB'
       Index = 2
+      LookupCache = False
       ProviderFlags = [pfInUpdate, pfInWhere]
+      ReadOnly = False
+      Required = False
+      MaxValue = 0
+      MinValue = 0
     end
     object FoldersANZFC: TFloatField
       DisplayWidth = 10
+      FieldKind = fkData
       FieldName = 'ANZFC'
       Index = 3
+      LookupCache = False
       ProviderFlags = [pfInUpdate, pfInWhere]
+      ReadOnly = False
+      Required = False
+      MaxValue = 0
+      MinValue = 0
     end
     object FoldersANZDB: TFloatField
       DisplayWidth = 10
+      FieldKind = fkData
       FieldName = 'ANZDB'
       Index = 4
+      LookupCache = False
       ProviderFlags = [pfInUpdate, pfInWhere]
+      ReadOnly = False
+      Required = False
+      MaxValue = 0
+      MinValue = 0
     end
     object FoldersANZOB: TFloatField
       DisplayWidth = 10
+      FieldKind = fkData
       FieldName = 'ANZOB'
       Index = 5
+      LookupCache = False
       ProviderFlags = [pfInUpdate, pfInWhere]
+      ReadOnly = False
+      Required = False
+      MaxValue = 0
+      MinValue = 0
     end
   end
   object FolderSource: TDatasource
@@ -839,53 +918,80 @@ object shake7mainform: Tshake7mainform
     top = 104
   end
   object Blocks: TDbf
+    Exclusive = True
     FilePath = 'C:\0759_triebsatz_t9\simatic\moby\ombstx\offline\00000001\'
     IndexDefs = <>
     TableName = 'Subblk.dbf'
     TableLevel = 3
     Filtered = True
+    FilterOptions = []
+    BeforeClose = BlocksBeforeClose
     OnCalcFields = BlocksCalcFields
     OnFilterRecord = BlocksFilterRecord
     left = 120
     top = 104
     object BlocksSUBBLKTYP: TStringField
       DisplayWidth = 5
+      FieldKind = fkData
       FieldName = 'SUBBLKTYP'
+      Index = 0
+      LookupCache = False
       ProviderFlags = [pfInUpdate, pfInWhere]
+      ReadOnly = False
+      Required = False
       Size = 5
     end
     object BlocksBLKNUMBER: TStringField
       DisplayWidth = 5
+      FieldKind = fkData
       FieldName = 'BLKNUMBER'
       Index = 1
+      LookupCache = False
       ProviderFlags = [pfInUpdate, pfInWhere]
+      ReadOnly = False
+      Required = False
       Size = 5
     end
     object BlocksPASSWORD: TLargeintField
       DisplayWidth = 10
+      FieldKind = fkData
       FieldName = 'PASSWORD'
       Index = 2
+      LookupCache = False
       ProviderFlags = [pfInUpdate, pfInWhere]
+      ReadOnly = False
+      Required = False
     end
     object BlocksBlockProtected: TStringField
       DisplayWidth = 20
       FieldKind = fkCalculated
       FieldName = 'BlockProtected'
       Index = 3
+      LookupCache = False
       ProviderFlags = [pfInUpdate, pfInWhere]
+      ReadOnly = False
+      Required = False
     end
     object BlocksUSERNAME: TStringField
       DisplayWidth = 8
+      FieldKind = fkData
       FieldName = 'USERNAME'
       Index = 4
+      LookupCache = False
       ProviderFlags = [pfInUpdate, pfInWhere]
+      ReadOnly = False
+      Required = False
       Size = 8
     end
     object BlocksBLOCKFNAME: TStringField
       DisplayWidth = 8
+      FieldKind = fkData
       FieldName = 'BLOCKFNAME'
       Index = 5
+      LookupCache = False
       ProviderFlags = [pfInUpdate, pfInWhere]
+      ReadOnly = False
+      Required = False
       Size = 8
     end
     object BlocksBlock: TStringField
@@ -893,27 +999,41 @@ object shake7mainform: Tshake7mainform
       FieldKind = fkCalculated
       FieldName = 'Block'
       Index = 6
+      LookupCache = False
       ProviderFlags = [pfInUpdate, pfInWhere]
+      ReadOnly = False
+      Required = False
     end
     object BlocksBLOCKNAME: TStringField
       DisplayWidth = 8
+      FieldKind = fkData
       FieldName = 'BLOCKNAME'
       Index = 7
+      LookupCache = False
       ProviderFlags = [pfInUpdate, pfInWhere]
+      ReadOnly = False
+      Required = False
       Size = 8
     end
     object BlocksVERSION: TSmallintField
       DisplayWidth = 10
+      FieldKind = fkData
       FieldName = 'VERSION'
       Index = 8
+      LookupCache = False
       ProviderFlags = [pfInUpdate, pfInWhere]
+      ReadOnly = False
+      Required = False
     end
     object BlocksVersionDisplay: TStringField
       DisplayWidth = 20
       FieldKind = fkCalculated
       FieldName = 'VersionDisplay'
       Index = 9
+      LookupCache = False
       ProviderFlags = [pfInUpdate, pfInWhere]
+      ReadOnly = False
+      Required = False
     end
   end
   object MRUManager: TMRUManager

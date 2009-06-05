@@ -47,6 +47,10 @@ type
     BlocksUSERNAME: TStringField;
     BlocksVERSION: TSmallintField;
     BlocksVersionDisplay: TStringField;
+    ShowOB: TCheckBox;
+    ShowDB: TCheckBox;
+    ShowFC: TCheckBox;
+    ShowFB: TCheckBox;
     Folders: TDBF;
     FoldersID: TFloatField;
     FoldersNAME: TStringField;
@@ -75,9 +79,11 @@ type
     BlocksGrid: TDBGrid;
     LockButton: TButton;
     UnlockButton: TButton;
+    procedure BlocksBeforeClose(DataSet: TDataSet);
     procedure BlocksGridPrepareCanvas(sender: TObject; DataCol: Integer;
       Column: TColumn; AState: TGridDrawState);
     procedure FoldersAfterScroll(DataSet: TDataSet);
+    procedure FormCloseQuery(Sender: TObject; var CanClose: boolean);
     procedure FormCreate(Sender: TObject);
     procedure MenuAboutClick(Sender: TObject);
     procedure MenuQuitClick(Sender: TObject);
@@ -88,6 +94,7 @@ type
     procedure OpenButtonClick(Sender: TObject);
     procedure MRUManagerChange(Sender: TObject);
     procedure RecentFilesChange(Sender: TObject);
+    procedure ShowTypeClick(Sender: TObject);
   private
     { Private declarations }
   public
@@ -154,7 +161,10 @@ procedure Tshake7mainform.BlocksFilterRecord(DataSet: TDataSet;
 begin
   BlockType:=strToIntDef(BlocksSUBBLKTYP.value,0);
   case BlockType of
-     8,10,12,14: Accept:=true;
+     8:   Accept:=ShowOB.Checked;
+     10:  Accept:=ShowDB.Checked;
+     12:  Accept:=ShowFC.Checked;
+     14:  Accept:=ShowFB.Checked;
      else Accept:=false;
   end;
 
@@ -231,12 +241,23 @@ begin
   OpenProject(RecentFiles.Text,false);
 end;
 
+procedure Tshake7mainform.ShowTypeClick(Sender: TObject);
+begin
+  if Blocks.Active then
+    Blocks.Refresh;
+end;
+
 procedure Tshake7mainform.BlocksGridPrepareCanvas(sender: TObject; DataCol: Integer;
   Column: TColumn; AState: TGridDrawState);
 begin
   if BlocksBlockProtected.value='Yes' then
     if GdSelected in AState then BlocksGrid.Canvas.Brush.Color:=$000080 {Dark red}
                             else BlocksGrid.Canvas.Brush.Color:=clRed
+end;
+
+procedure Tshake7mainform.BlocksBeforeClose(DataSet: TDataSet);
+begin
+  Blocks.DeleteIndex('SHAKEORDER.NDX');
 end;
 
 procedure Tshake7mainform.FoldersAfterScroll(DataSet: TDataSet);
@@ -247,6 +268,8 @@ begin
     Blocks.Active:=false;
     Blocks.FilePathFull:=Folders.FilePathFull+IntToHex(Trunc(FoldersId.Value),8);
     Blocks.Active:=true;
+    Blocks.AddIndex('SHAKEORDER.NDX','SUBBLKTYP + BLKNUMBER',[]);
+    Blocks.IndexName:='SHAKEORDER.NDX';
     Blocks.First;
     BlocksGrid.Enabled:=Blocks.RecordCount>0;
     LockButton.Enabled:=BlocksGrid.Enabled;
@@ -254,6 +277,13 @@ begin
   finally
     Screen.Cursor:=crDefault;
   end;
+end;
+
+procedure Tshake7mainform.FormCloseQuery(Sender: TObject; var CanClose: boolean
+  );
+begin
+  Blocks.Active:=false;
+  Folders.Active:=false;
 end;
 
 initialization
