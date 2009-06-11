@@ -819,7 +819,6 @@ object shake7mainform: Tshake7mainform
     TabOrder = 7
   end
   object Folders: TDbf
-    Exclusive = True
     IndexDefs = <>
     ReadOnly = True
     TableName = 'bstcntof.dbf'
@@ -918,7 +917,6 @@ object shake7mainform: Tshake7mainform
     top = 104
   end
   object Blocks: TDbf
-    Exclusive = True
     FilePath = 'C:\0759_triebsatz_t9\simatic\moby\ombstx\offline\00000001\'
     IndexDefs = <>
     TableName = 'Subblk.dbf'

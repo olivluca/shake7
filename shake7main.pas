@@ -257,7 +257,7 @@ end;
 
 procedure Tshake7mainform.BlocksBeforeClose(DataSet: TDataSet);
 begin
-  Blocks.DeleteIndex('SHAKEORDER.NDX');
+  //Blocks.DeleteIndex('SHAKEORDER');
 end;
 
 procedure Tshake7mainform.FoldersAfterScroll(DataSet: TDataSet);
@@ -268,8 +268,8 @@ begin
     Blocks.Active:=false;
     Blocks.FilePathFull:=Folders.FilePathFull+IntToHex(Trunc(FoldersId.Value),8);
     Blocks.Active:=true;
-    Blocks.AddIndex('SHAKEORDER.NDX','SUBBLKTYP + BLKNUMBER',[]);
-    Blocks.IndexName:='SHAKEORDER.NDX';
+    //Blocks.AddIndex('SHAKEORDER','SUBBLKTYP + BLKNUMBER',[]);
+    //Blocks.IndexName:='SHAKEORDER';
     Blocks.First;
     BlocksGrid.Enabled:=Blocks.RecordCount>0;
     LockButton.Enabled:=BlocksGrid.Enabled;
