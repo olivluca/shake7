@@ -28,7 +28,7 @@ uses
   {$ENDIF}{$ENDIF}
   Interfaces, // this includes the LCL widgetset
   Forms
-  { you can add units after this }, shake7main, DBFLaz, rx, about;
+  { you can add units after this }, shake7main, DBFLaz, rx, about, MemDSLaz;
 
 {$IFDEF WINDOWS}{$R shake7.rc}{$ENDIF}
 

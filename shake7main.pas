@@ -4,7 +4,7 @@ unit shake7main;
 
 { Lock/Unlock simatic step7 blocks (Know How Protection)
 
-  Copyright (C) 2008 Luca Olivetti <luca@ventoso.org>
+  Copyright (C) 2008-2009 Luca Olivetti <luca@ventoso.org>
 
   This source is free software; you can redistribute it and/or modify it under
   the terms of the GNU General Public License as published by the Free
@@ -26,8 +26,8 @@ interface
 
 uses
   Classes, SysUtils, LResources, Forms, Controls, Graphics, Dialogs, dbf, db,
-  ExtCtrls, Buttons, StdCtrls, DBGrids, DbCtrls, Grids, MRUList, inifiles,
-  Menus, ComCtrls;
+  memds, ExtCtrls, Buttons, StdCtrls, DBGrids, Grids, MRUList,
+  inifiles, Menus;
 
 type
 
@@ -47,6 +47,7 @@ type
     BlocksUSERNAME: TStringField;
     BlocksVERSION: TSmallintField;
     BlocksVersionDisplay: TStringField;
+    MemBlocks: TMemDataset;
     ShowOB: TCheckBox;
     ShowDB: TCheckBox;
     ShowFC: TCheckBox;
@@ -83,8 +84,8 @@ type
     procedure BlocksGridPrepareCanvas(sender: TObject; DataCol: Integer;
       Column: TColumn; AState: TGridDrawState);
     procedure FoldersAfterScroll(DataSet: TDataSet);
-    procedure FormCloseQuery(Sender: TObject; var CanClose: boolean);
     procedure FormCreate(Sender: TObject);
+    procedure FormDestroy(Sender: TObject);
     procedure MenuAboutClick(Sender: TObject);
     procedure MenuQuitClick(Sender: TObject);
     procedure OpenProject(Filename:string;AddToMRU:boolean);
@@ -97,6 +98,9 @@ type
     procedure ShowTypeClick(Sender: TObject);
   private
     { Private declarations }
+    FBlockList:TStringList;
+    procedure ClearBlocks;
+    procedure RefreshMemBlocks;
   public
     { Public declarations }
   end;
@@ -137,12 +141,22 @@ begin
 
 end;
 
+type TMyMemDs = class(TMemDataset); //ugly hack, see fpc bug #13967
+
 procedure Tshake7mainform.FormCreate(Sender: TObject);
 var ini:TIniFile;
 begin
   ini:=TIniFile.Create(GetUserDir+'shake7.ini');
   MRUManager.LoadFromIni(ini,'recent_files');
   ini.free;
+  FBlockList:=TStringList.Create;
+  TMyMemDs(MemBlocks).BookmarkSize:=sizeof(Longint); //second part of ugly hack
+end;
+
+procedure Tshake7mainform.FormDestroy(Sender: TObject);
+begin
+  ClearBlocks;
+  FBlockList.Free;
 end;
 
 procedure Tshake7mainform.MenuAboutClick(Sender: TObject);
@@ -196,24 +210,31 @@ end;
 
 procedure Tshake7mainform.LockUnlockClick(Sender: TObject);
 var i:integer;
-   pippo:string;
    lockvalue:integer;
    bm:TBookmark;
 begin
   if Sender=LockButton then lockvalue:=3 else lockvalue:=0;
   Screen.cursor:=crHourGlass;
-  bm:=Blocks.GetBookmark;
+  bm:=MemBlocks.GetBookmark;
+  Blocks.GotoBookmark(FBlockList.Objects[MemBlocks.FieldByName('Number').AsInteger]);
   Blocks.Edit;
   BlocksPASSWORD.Value:=lockvalue;
   Blocks.Post;
+  MemBlocks.Edit;
+  MemBlocks.FieldByName('BlockProtected').Value:=BlocksBlockProtected.Value;
+  MemBlocks.Post;
   for i:=0 to BlocksGrid.SelectedRows.Count-1 do
   begin
-    Blocks.GotoBookmark(pointer(BlocksGrid.SelectedRows.Items[i]));
+    MemBlocks.GotoBookmark(pointer(BlocksGrid.SelectedRows.Items[i]));
+    Blocks.GotoBookmark(FBlockList.Objects[MemBlocks.FieldByName('Number').AsInteger]);
     Blocks.Edit;
     BlocksPASSWORD.Value:=lockvalue;
     Blocks.Post;
+    MemBlocks.Edit;
+    MemBlocks.FieldByName('BlockProtected').Value:=BlocksBlockProtected.Value;
+    MemBlocks.Post;
   end;
-  Blocks.GotoBookmark(bm);
+  MemBlocks.GotoBookmark(bm);
   Screen.cursor:=crDefault;
 end;
 
@@ -244,20 +265,72 @@ end;
 procedure Tshake7mainform.ShowTypeClick(Sender: TObject);
 begin
   if Blocks.Active then
+  begin
+    ClearBlocks;
     Blocks.Refresh;
+    RefreshMemBlocks;
+  end;
+end;
+
+procedure Tshake7mainform.ClearBlocks;
+var i:integer;
+begin
+  for i:=0 to FBlockList.Count-1 do
+    Blocks.FreeBookmark(FBlockList.Objects[i]);
+  FBlockList.Clear;
+end;
+
+procedure Tshake7mainform.RefreshMemBlocks;
+var
+  i: integer;
+begin
+  BlocksGrid.SelectedRows.Clear;
+  BlocksSource.DataSet:=nil;
+  Blocks.First;
+  MemBlocks.Clear(false);
+  //sort blocks
+  while not Blocks.Eof do
+  begin
+     FBlockList.AddObject(BlocksSUBBLKTYP.Value+BlocksBLKNUMBER.Value, TObject(
+       Blocks.GetBookmark()));
+     Blocks.Next;
+  end;
+  FBlockList.Sort;
+  for i:=0 to FBlockList.Count-1 do
+  begin
+     Blocks.GotoBookmark(FBlockList.Objects[i]);
+     MemBlocks.AppendRecord([
+       BlocksSUBBLKTYP.Value,
+       BlocksBLKNUMBER.Value,
+       BlocksPASSWORD.Value,
+       BlocksBlockProtected.Value,
+       BlocksUSERNAME.Value,
+       BlocksBLOCKFNAME.Value,
+       BlocksBlock.Value,
+       BlocksBLOCKNAME.Value,
+       BlocksVERSION.Value,
+       BlocksVersionDisplay.Value,
+       i
+       ]);
+  end;
+  MemBlocks.First;
+  BlocksGrid.Enabled:=MemBlocks.RecordCount>0;
+  LockButton.Enabled:=BlocksGrid.Enabled;
+  UnlockButton.Enabled:=BlocksGrid.Enabled;
+  BlocksSource.DataSet:=MemBlocks;
 end;
 
 procedure Tshake7mainform.BlocksGridPrepareCanvas(sender: TObject; DataCol: Integer;
   Column: TColumn; AState: TGridDrawState);
 begin
-  if BlocksBlockProtected.value='Yes' then
+  if MemBlocks.FieldByName('BlockProtected').AsString='Yes' then
     if GdSelected in AState then BlocksGrid.Canvas.Brush.Color:=$000080 {Dark red}
                             else BlocksGrid.Canvas.Brush.Color:=clRed
 end;
 
 procedure Tshake7mainform.BlocksBeforeClose(DataSet: TDataSet);
 begin
-  //Blocks.DeleteIndex('SHAKEORDER');
+  ClearBlocks;
 end;
 
 procedure Tshake7mainform.FoldersAfterScroll(DataSet: TDataSet);
@@ -268,22 +341,10 @@ begin
     Blocks.Active:=false;
     Blocks.FilePathFull:=Folders.FilePathFull+IntToHex(Trunc(FoldersId.Value),8);
     Blocks.Active:=true;
-    //Blocks.AddIndex('SHAKEORDER','SUBBLKTYP + BLKNUMBER',[]);
-    //Blocks.IndexName:='SHAKEORDER';
-    Blocks.First;
-    BlocksGrid.Enabled:=Blocks.RecordCount>0;
-    LockButton.Enabled:=BlocksGrid.Enabled;
-    UnlockButton.Enabled:=BlocksGrid.Enabled;
+    RefreshMemBlocks;
   finally
     Screen.Cursor:=crDefault;
   end;
-end;
-
-procedure Tshake7mainform.FormCloseQuery(Sender: TObject; var CanClose: boolean
-  );
-begin
-  Blocks.Active:=false;
-  Folders.Active:=false;
 end;
 
 initialization

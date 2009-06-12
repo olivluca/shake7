@@ -544,8 +544,8 @@ object shake7mainform: Tshake7mainform
     0000
   }
   Menu = MainMenu1
-  OnCloseQuery = FormCloseQuery
   OnCreate = FormCreate
+  OnDestroy = FormDestroy
   Position = poScreenCenter
   LCLVersion = '0.9.27'
   object Label4: TLabel
@@ -825,8 +825,8 @@ object shake7mainform: Tshake7mainform
     TableLevel = 4
     FilterOptions = []
     AfterScroll = FoldersAfterScroll
-    left = 48
-    top = 104
+    left = 80
+    top = 96
     object FoldersID: TFloatField
       DisplayWidth = 10
       FieldKind = fkData
@@ -902,12 +902,12 @@ object shake7mainform: Tshake7mainform
   object FolderSource: TDatasource
     DataSet = Folders
     left = 80
-    top = 104
+    top = 144
   end
   object BlocksSource: TDatasource
-    DataSet = Blocks
-    left = 152
-    top = 104
+    DataSet = MemBlocks
+    left = 352
+    top = 144
   end
   object OpenDialog: TOpenDialog
     Title = 'Open project or library'
@@ -917,7 +917,7 @@ object shake7mainform: Tshake7mainform
     top = 104
   end
   object Blocks: TDbf
-    FilePath = 'C:\0759_triebsatz_t9\simatic\moby\ombstx\offline\00000001\'
+    FilePath = 'C:\scratch\C06\ombstx\offline\00000001\'
     IndexDefs = <>
     TableName = 'Subblk.dbf'
     TableLevel = 3
@@ -926,8 +926,8 @@ object shake7mainform: Tshake7mainform
     BeforeClose = BlocksBeforeClose
     OnCalcFields = BlocksCalcFields
     OnFilterRecord = BlocksFilterRecord
-    left = 120
-    top = 104
+    left = 136
+    top = 96
     object BlocksSUBBLKTYP: TStringField
       DisplayWidth = 5
       FieldKind = fkData
@@ -1060,5 +1060,77 @@ object shake7mainform: Tshake7mainform
         OnClick = MenuAboutClick
       end
     end
+  end
+  object MemBlocks: TMemDataset
+    Active = True
+    FieldDefs = <    
+      item
+        Name = 'SUBBLKTYP'
+        DataType = ftString
+        Precision = -1
+        Size = 5
+      end    
+      item
+        Name = 'BLKNUMBER'
+        DataType = ftString
+        Precision = -1
+        Size = 5
+      end    
+      item
+        Name = 'PASSWORD'
+        DataType = ftLargeint
+        Precision = -1
+        Size = 0
+      end    
+      item
+        Name = 'BlockProtected'
+        DataType = ftString
+        Precision = -1
+        Size = 20
+      end    
+      item
+        Name = 'USERNAME'
+        DataType = ftString
+        Precision = -1
+        Size = 8
+      end    
+      item
+        Name = 'BLOCKFNAME'
+        DataType = ftString
+        Precision = -1
+        Size = 8
+      end    
+      item
+        Name = 'Block'
+        DataType = ftString
+        Precision = -1
+        Size = 20
+      end    
+      item
+        Name = 'BLOCKNAME'
+        DataType = ftString
+        Precision = -1
+        Size = 8
+      end    
+      item
+        Name = 'VERSION'
+        DataType = ftSmallint
+        Precision = -1
+        Size = 0
+      end    
+      item
+        Name = 'VersionDisplay'
+        DataType = ftString
+        Precision = -1
+        Size = 20
+      end    
+      item
+        Name = 'Number'
+        DataType = ftInteger
+        Precision = 0
+        Size = 0
+      end>
+    left = 352
+    top = 96
   end
 end
