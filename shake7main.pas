@@ -4,7 +4,7 @@ unit shake7main;
 
 { Lock/Unlock simatic step7 blocks (Know How Protection)
 
-  Copyright (C) 2008-2009 Luca Olivetti <luca@ventoso.org>
+  Copyright (C) 2008-2011 Luca Olivetti <luca@ventoso.org>
 
   This source is free software; you can redistribute it and/or modify it under
   the terms of the GNU General Public License as published by the Free
@@ -27,27 +27,96 @@ interface
 uses
   Classes, SysUtils, LResources, Forms, Controls, Graphics, Dialogs, dbf, db,
   memds, ExtCtrls, Buttons, StdCtrls, DBGrids, Grids, MRUList,
-  inifiles, Menus;
+  inifiles, Menus, Spin;
 
 type
 
-  { Tshake7mainform }
+   TBlockType = record
+     number:integer;
+     name:string;
+     show:boolean;
+   end;
+
+const
+
+   BlockTypes:Array[1..5] of TBlockType =
+      (
+        (number:1;  name:'UDT'; show:true)
+       ,(number:8;  name:'OB';  show:true)
+       ,(number:10; name:'DB';  show:true)
+       ,(number:12; name:'FC';  show:true)
+       ,(number:14; name:'FB';  show:true)
+      );
+
+   BlockLanguages:array[1..40] of string =
+      (
+       {1}    'AWL'
+       {2}   ,'KOP'
+       {3}   ,'FUP'
+       {4}   ,'SCL'
+       {5}   ,'DB'
+       {6}   ,'GRAPH'
+       {7}   ,'SDB'
+       {8}   ,'CPU DB'
+       {9}   ,'ASSEMBLER'
+       {10}  ,'DB (of FB)'
+       {11}  ,'DB (of SFB)'
+       {12}  ,'DB (of UDT)'
+       {13}  ,'GD'
+       {14}  ,'PARATOOL'
+       {15}  ,'??00015'
+       {16}  ,'NCM'
+       {17}  ,'CPU SDB'
+       {18}  ,'STL S7-200'
+       {19}  ,'LAD ST-200'
+       {20}  ,'MCU IBN'
+       {21}  ,'C for S7'
+       {22}  ,'HIGRAPH'
+       {23}  ,'CFC'
+       {24}  ,'SFC'
+       {25}  ,'CFC/SFC'
+       {26}  ,'S7-PDIAG'
+       {27}  ,'reserve 27'
+       {28}  ,'reserve 28'
+       {29}  ,'SFM'
+       {30}  ,'CHART'
+       {31}  ,'AWL F'
+       {32}  ,'KOP F'
+       {33}  ,'FUP F'
+       {34}  ,'DB F'
+       {35}  ,'CALL F'
+       {36}  ,'D7-SYS'
+       {37}  ,'Tech Obj'
+       {38}  ,'KOP F (unchecked)'
+       {39}  ,'FUP F (unchecked)'
+       {40}  ,'SFM'
+       );
+
+type
+
+   { Tshake7mainform }
 
   Tshake7mainform = class(TForm)
     Bevel1: TBevel;
     Bevel2: TBevel;
     Blocks: TDbf;
+    BlocksBLKLANG: TStringField;
     BlocksBLKNUMBER: TStringField;
     BlocksBlock: TStringField;
     BlocksBLOCKFNAME: TStringField;
     BlocksBLOCKNAME: TStringField;
     BlocksBlockProtected: TStringField;
+    BlocksLanguage: TStringField;
     BlocksPASSWORD: TLargeintField;
     BlocksSUBBLKTYP: TStringField;
     BlocksUSERNAME: TStringField;
     BlocksVERSION: TSmallintField;
     BlocksVersionDisplay: TStringField;
+    ChangeLanguageButton: TButton;
+    Label3: TLabel;
+    Language: TComboBox;
     MemBlocks: TMemDataset;
+    ShowUDT: TCheckBox;
     ShowOB: TCheckBox;
     ShowDB: TCheckBox;
     ShowFC: TCheckBox;
@@ -79,6 +148,7 @@ type
     FoldersGrid: TDBGrid;
     BlocksGrid: TDBGrid;
     LockButton: TButton;
+    ForceLang: TSpinEdit;
     UnlockButton: TButton;
     procedure BlocksBeforeClose(DataSet: TDataSet);
     procedure BlocksGridPrepareCanvas(sender: TObject; DataCol: Integer;
@@ -95,6 +165,7 @@ type
     procedure OpenButtonClick(Sender: TObject);
     procedure MRUManagerChange(Sender: TObject);
     procedure RecentFilesChange(Sender: TObject);
+    procedure ChangeLanguageClick(Sender: TObject);
     procedure ShowTypeClick(Sender: TObject);
   private
     { Private declarations }
@@ -111,6 +182,32 @@ var
 implementation
 
 uses about;
+
+function ShowBlockType(number:integer):boolean;
+var
+  i: Integer;
+begin
+  result:=false;
+  for i:=low(BlockTypes) to high(BlockTypes) do
+    if BlockTypes[i].number=number then
+    begin
+      Result:=BlockTypes[i].show;
+      exit;
+    end;
+end;
+
+procedure EnableBlockType(name:string; enable:boolean);
+var
+  i: integer;
+begin
+  for i:=low(BlockTypes) to high(BlockTypes) do
+    if BlockTypes[i].name=name then
+    begin
+      BlockTypes[i].show:=enable;
+      exit;
+    end;
+
+end;
 
 procedure Tshake7mainform.OpenProject(Filename:string;AddToMRU:boolean);
 begin
@@ -145,7 +242,12 @@ type TMyMemDs = class(TMemDataset); //ugly hack, see fpc bug #13967
 
 procedure Tshake7mainform.FormCreate(Sender: TObject);
 var ini:TIniFile;
+    i:integer;
 begin
+  for i:=low(BlockLanguages) to high(BlockLanguages) do
+     Language.Items.Add(BlockLanguages[i]);
+  Language.ItemIndex:=0;
+  ForceLang.Visible:=ParamStr(1)='testlang';
   ini:=TIniFile.Create(GetUserDir+'shake7.ini');
   MRUManager.LoadFromIni(ini,'recent_files');
   ini.free;
@@ -171,41 +273,34 @@ end;
 
 procedure Tshake7mainform.BlocksFilterRecord(DataSet: TDataSet;
   var Accept: Boolean);
-  var BlockType:integer;
 begin
-  BlockType:=strToIntDef(BlocksSUBBLKTYP.value,0);
-  case BlockType of
-     8:   Accept:=ShowOB.Checked;
-     10:  Accept:=ShowDB.Checked;
-     12:  Accept:=ShowFC.Checked;
-     14:  Accept:=ShowFB.Checked;
-     else Accept:=false;
-  end;
-
+  Accept:=ShowBlockType(strToIntDef(BlocksSUBBLKTYP.value,0));
 end;
 
 procedure Tshake7mainform.BlocksCalcFields(DataSet: TDataSet);
-  Var BlockType,BlockNum:integer;
+  Var BlockType,BlockNum,BlockLang:integer;
       BlockName:string;
+      i: Integer;
 begin
   BlockType:=StrToIntDef(BlocksSUBBLKTYP.value,0);
-  Case BlockType of
-         8: //ob
-            BlockName:='OB';
-         10: //db
-            BlockName:='DB';
-         12: //fc
-            BlockName:='FC';
-         14: //fb
-            BlockName:='FB';
-         else BlockName:='??'
-  end; //case
+  BlockName:='??';
+  for i:=low(BlockTypes) to high(BlockTypes) do
+    if BlockTypes[i].number=BlockType then
+    begin
+      BlockName:=BlockTypes[i].name;
+      break;
+    end;
   BlockNum:=StrToIntDef(BlocksBLKNumber.value,-1);
   if BlockNum>=0 then BlockName:=BlockName+IntToStr(BlockNum);
   BlocksBlock.Value:=BlockName;
   if BlocksPassword.Value<>0 then BlocksBlockProtected.value:='Yes'
                              else BlocksBlockProtected.value:='No';
   BlocksVersionDisplay.Value:=format('%d.%d',[BlocksVersion.Value div 16, BlocksVersion.Value mod 16]);
+  BlockLang:=StrToIntDef(BlocksBLKLANG.Value,0);
+  if (BlockLang>=low(BlockLanguages)) and (BlockLang<=high(BlockLanguages)) then
+    BlocksLanguage.Value:=BlockLanguages[BlockLang]
+  else
+    BlocksLanguage.Value:='??'+BlocksBLKLANG.Value;
 end;
 
 procedure Tshake7mainform.LockUnlockClick(Sender: TObject);
@@ -238,6 +333,46 @@ begin
   Screen.cursor:=crDefault;
 end;
 
+procedure Tshake7mainform.ChangeLanguageClick(Sender: TObject);
+Type
+   TSafetyType = (NormalBlock, FBlock);
+   TBlockConversion = array[TSafetyType] of integer;
+var
+   NewLanguage:string;
+   bm:TBookmark;
+   i:integer;
+
+   procedure DoChangeLanguage;
+   var i:integer;
+       CurrentBlockType:integer;
+       NewBlockType:string;
+   begin
+     Blocks.Edit;
+     BlocksBLKLANG.Value:=NewLanguage;
+     Blocks.Post;
+     MemBlocks.Edit;
+     MemBlocks.FieldByName('Language').Value:=BlocksLanguage.Value;
+     MemBlocks.Post;
+   end;
+
+begin
+  NewLanguage:=format('%.4d',[Language.ItemIndex+1]);
+  if ForceLang.Value<>0 then
+    NewLanguage:=format('%.4d',[ForceLang.Value]);
+  Screen.cursor:=crHourGlass;
+  bm:=MemBlocks.GetBookmark;
+  Blocks.GotoBookmark(FBlockList.Objects[MemBlocks.FieldByName('Number').AsInteger]);
+  DoChangeLanguage;
+  for i:=0 to BlocksGrid.SelectedRows.Count-1 do
+  begin
+    MemBlocks.GotoBookmark(pointer(BlocksGrid.SelectedRows.Items[i]));
+    Blocks.GotoBookmark(FBlockList.Objects[MemBlocks.FieldByName('Number').AsInteger]);
+    DoChangeLanguage;
+  end;
+  MemBlocks.GotoBookmark(bm);
+  Screen.cursor:=crDefault;
+end;
+
 procedure Tshake7mainform.OpenButtonClick(Sender: TObject);
 begin
   if OpenDialog.Execute then
@@ -264,6 +399,7 @@ end;
 
 procedure Tshake7mainform.ShowTypeClick(Sender: TObject);
 begin
+  EnableBlockType(TCheckBox(sender).caption, TCheckBox(sender).Checked);
   if Blocks.Active then
   begin
     ClearBlocks;
@@ -300,6 +436,7 @@ begin
   begin
      Blocks.GotoBookmark(FBlockList.Objects[i]);
      MemBlocks.AppendRecord([
+       BlocksBLKLANG.Value,
        BlocksSUBBLKTYP.Value,
        BlocksBLKNUMBER.Value,
        BlocksPASSWORD.Value,
@@ -310,13 +447,15 @@ begin
        BlocksBLOCKNAME.Value,
        BlocksVERSION.Value,
        BlocksVersionDisplay.Value,
-       i
+       i,
+       BlocksLanguage.Value
        ]);
   end;
   MemBlocks.First;
   BlocksGrid.Enabled:=MemBlocks.RecordCount>0;
   LockButton.Enabled:=BlocksGrid.Enabled;
   UnlockButton.Enabled:=BlocksGrid.Enabled;
+  ChangeLanguageButton.Enabled:=BlocksGrid.Enabled;
   BlocksSource.DataSet:=MemBlocks;
 end;
 
@@ -325,7 +464,11 @@ procedure Tshake7mainform.BlocksGridPrepareCanvas(sender: TObject; DataCol: Inte
 begin
   if MemBlocks.FieldByName('BlockProtected').AsString='Yes' then
     if GdSelected in AState then BlocksGrid.Canvas.Brush.Color:=$000080 {Dark red}
-                            else BlocksGrid.Canvas.Brush.Color:=clRed
+                            else BlocksGrid.Canvas.Brush.Color:=clRed;
+  //F-Blocks
+  if (DataCol=0) and (StrToIntDef(MemBlocks.FieldByName('BLKLANG').AsString,0)>30) then
+    if GdSelected in AState then BlocksGrid.Canvas.Brush.Color:=$129dcb {Dark yellow}
+                            else BlocksGrid.Canvas.Brush.Color:=clYellow;
 end;
 
 procedure Tshake7mainform.BlocksBeforeClose(DataSet: TDataSet);

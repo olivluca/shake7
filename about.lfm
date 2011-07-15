@@ -9,7 +9,7 @@ object AboutForm: TAboutForm
   ClientHeight = 348
   ClientWidth = 413
   Position = poMainFormCenter
-  LCLVersion = '0.9.27'
+  LCLVersion = '0.9.30'
   object Memo1: TMemo
     Left = 8
     Height = 290
@@ -18,7 +18,7 @@ object AboutForm: TAboutForm
     Lines.Strings = (
       'Lock/Unlock simatic step7 blocks (Know How Protection)'
       ''
-      'Copyright (C) 2008-2009 Luca Olivetti <luca@ventoso.org>'
+      'Copyright (C) 2008-2011 Luca Olivetti <luca@ventoso.org>'
       ''
       'This source is free software; you can redistribute it and/or modify it under the '
       'terms of the GNU General Public License as published by the Free Software '
@@ -35,7 +35,6 @@ object AboutForm: TAboutForm
       'the Free Software Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA '
       '02111-1307, USA.'
     )
-    OnChange = Memo1Change
     ReadOnly = True
     TabOrder = 1
     TabStop = False

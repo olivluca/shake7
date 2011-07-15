@@ -1,11 +1,11 @@
 object shake7mainform: Tshake7mainform
   Left = 386
-  Height = 471
+  Height = 473
   Top = 208
-  Width = 451
+  Width = 514
   Caption = 'Shake7: lock and unlock s7 blocks'
-  ClientHeight = 452
-  ClientWidth = 451
+  ClientHeight = 454
+  ClientWidth = 514
   Constraints.MinHeight = 350
   Constraints.MinWidth = 250
   Font.Height = -11
@@ -547,7 +547,7 @@ object shake7mainform: Tshake7mainform
   OnCreate = FormCreate
   OnDestroy = FormDestroy
   Position = poScreenCenter
-  LCLVersion = '0.9.27'
+  LCLVersion = '0.9.30'
   object Label4: TLabel
     Left = 0
     Height = 17
@@ -584,7 +584,6 @@ object shake7mainform: Tshake7mainform
     Top = 20
     Width = 55
     Caption = '&Open'
-    Color = clBtnFace
     Glyph.Data = {
       76010000424D7801000000000000760000002800000020000000100000000100
       04000000000000000000120B0000120B00000000000000000000000000000000
@@ -621,7 +620,7 @@ object shake7mainform: Tshake7mainform
     Left = 0
     Height = 5
     Top = 0
-    Width = 451
+    Width = 514
     Align = alTop
     Shape = bsTopLine
   end
@@ -629,7 +628,7 @@ object shake7mainform: Tshake7mainform
     Left = 1
     Height = 8
     Top = 43
-    Width = 450
+    Width = 513
     Anchors = [akTop, akLeft, akRight]
     Shape = bsBottomLine
   end
@@ -637,8 +636,9 @@ object shake7mainform: Tshake7mainform
     Left = 0
     Height = 108
     Top = 72
-    Width = 448
+    Width = 511
     Anchors = [akTop, akLeft, akRight]
+    Color = clWindow
     Columns = <    
       item
         Title.Caption = 'Folder name'
@@ -673,16 +673,17 @@ object shake7mainform: Tshake7mainform
     Options = [dgTitles, dgIndicator, dgColumnResize, dgColLines, dgRowLines, dgRowSelect, dgAlwaysShowSelection, dgConfirmDelete, dgCancelOnExit]
     ReadOnly = True
     Scrollbars = ssAutoBoth
-    TabOrder = 0
+    TabOrder = 1
     TitleFont.Height = -11
     TitleFont.Name = 'MS Sans Serif'
   end
   object BlocksGrid: TDBGrid
     Left = 0
-    Height = 195
+    Height = 184
     Top = 208
-    Width = 450
+    Width = 513
     Anchors = [akTop, akLeft, akRight, akBottom]
+    Color = clWindow
     Columns = <    
       item
         Title.Caption = 'Block'
@@ -712,12 +713,17 @@ object shake7mainform: Tshake7mainform
         Title.Caption = 'Version'
         Width = 52
         FieldName = 'VersionDisplay'
+      end    
+      item
+        Title.Caption = 'Language'
+        Width = 60
+        FieldName = 'Language'
       end>
     DataSource = BlocksSource
     Options = [dgTitles, dgIndicator, dgColumnResize, dgColLines, dgRowLines, dgRowSelect, dgAlwaysShowSelection, dgConfirmDelete, dgCancelOnExit, dgMultiselect]
     ReadOnly = True
     Scrollbars = ssAutoBoth
-    TabOrder = 1
+    TabOrder = 7
     TitleFont.Height = -11
     TitleFont.Name = 'MS Sans Serif'
     OnPrepareCanvas = BlocksGridPrepareCanvas
@@ -725,25 +731,25 @@ object shake7mainform: Tshake7mainform
   object Panel1: TPanel
     AnchorSideRight.Control = Owner
     AnchorSideRight.Side = asrCenter
-    Left = 112
-    Height = 49
-    Top = 404
-    Width = 226
+    Left = 45
+    Height = 62
+    Top = 392
+    Width = 424
     Anchors = [akRight, akBottom]
     BevelOuter = bvNone
-    ClientHeight = 49
-    ClientWidth = 226
-    TabOrder = 2
+    ClientHeight = 62
+    ClientWidth = 424
+    TabOrder = 8
     object Label2: TLabel
-      Left = 8
+      Left = 87
       Height = 14
       Top = 1
-      Width = 208
+      Width = 210
       Caption = 'CTRL+click to select/unselect multiple items'
       ParentColor = False
     end
     object LockButton: TButton
-      Left = 16
+      Left = 8
       Height = 27
       Top = 21
       Width = 73
@@ -753,7 +759,7 @@ object shake7mainform: Tshake7mainform
       TabOrder = 0
     end
     object UnlockButton: TButton
-      Left = 136
+      Left = 96
       Height = 27
       Top = 21
       Width = 73
@@ -762,20 +768,60 @@ object shake7mainform: Tshake7mainform
       OnClick = LockUnlockClick
       TabOrder = 1
     end
+    object ChangeLanguageButton: TButton
+      Left = 295
+      Height = 27
+      Top = 22
+      Width = 105
+      Caption = 'Change language'
+      Enabled = False
+      OnClick = ChangeLanguageClick
+      TabOrder = 4
+    end
+    object Language: TComboBox
+      Left = 191
+      Height = 21
+      Top = 22
+      Width = 100
+      ItemHeight = 13
+      Style = csDropDownList
+      TabOrder = 2
+    end
+    object ForceLang: TSpinEdit
+      Left = 302
+      Height = 21
+      Top = 2
+      Width = 98
+      MaxValue = 99999
+      TabOrder = 3
+      Visible = False
+    end
+    object Label3: TLabel
+      Left = 179
+      Height = 14
+      Top = 48
+      Width = 231
+      Caption = 'Setting the wrong language could be dangerous!'
+      Font.Color = clRed
+      Font.Height = -11
+      Font.Name = 'MS Sans Serif'
+      ParentColor = False
+      ParentFont = False
+    end
   end
   object RecentFiles: TComboBox
     Left = 72
     Height = 21
     Top = 20
-    Width = 376
+    Width = 439
     Anchors = [akTop, akLeft, akRight]
     ItemHeight = 13
     OnChange = RecentFilesChange
     Style = csDropDownList
-    TabOrder = 3
+    TabOrder = 0
   end
   object ShowOB: TCheckBox
-    Left = 112
+    Left = 152
     Height = 17
     Top = 191
     Width = 35
@@ -783,10 +829,10 @@ object shake7mainform: Tshake7mainform
     Checked = True
     OnClick = ShowTypeClick
     State = cbChecked
-    TabOrder = 4
+    TabOrder = 3
   end
   object ShowDB: TCheckBox
-    Left = 152
+    Left = 192
     Height = 17
     Top = 191
     Width = 35
@@ -794,10 +840,10 @@ object shake7mainform: Tshake7mainform
     Checked = True
     OnClick = ShowTypeClick
     State = cbChecked
-    TabOrder = 5
+    TabOrder = 4
   end
   object ShowFC: TCheckBox
-    Left = 192
+    Left = 232
     Height = 17
     Top = 191
     Width = 33
@@ -805,10 +851,10 @@ object shake7mainform: Tshake7mainform
     Checked = True
     OnClick = ShowTypeClick
     State = cbChecked
-    TabOrder = 6
+    TabOrder = 5
   end
   object ShowFB: TCheckBox
-    Left = 232
+    Left = 272
     Height = 17
     Top = 191
     Width = 33
@@ -816,7 +862,18 @@ object shake7mainform: Tshake7mainform
     Checked = True
     OnClick = ShowTypeClick
     State = cbChecked
-    TabOrder = 7
+    TabOrder = 6
+  end
+  object ShowUDT: TCheckBox
+    Left = 104
+    Height = 17
+    Top = 191
+    Width = 43
+    Caption = 'UDT'
+    Checked = True
+    OnClick = ShowTypeClick
+    State = cbChecked
+    TabOrder = 2
   end
   object Folders: TDbf
     IndexDefs = <>
@@ -917,7 +974,7 @@ object shake7mainform: Tshake7mainform
     top = 104
   end
   object Blocks: TDbf
-    FilePath = 'C:\scratch\C06\ombstx\offline\00000001\'
+    FilePath = 'D:\scratch\T11-P1_2\ombstx\offline\00000001\'
     IndexDefs = <>
     TableName = 'Subblk.dbf'
     TableLevel = 3
@@ -928,11 +985,22 @@ object shake7mainform: Tshake7mainform
     OnFilterRecord = BlocksFilterRecord
     left = 136
     top = 96
+    object BlocksBLKLANG: TStringField
+      DisplayWidth = 5
+      FieldKind = fkData
+      FieldName = 'BLKLANG'
+      Index = 0
+      LookupCache = False
+      ProviderFlags = [pfInUpdate, pfInWhere]
+      ReadOnly = False
+      Required = False
+      Size = 5
+    end
     object BlocksSUBBLKTYP: TStringField
       DisplayWidth = 5
       FieldKind = fkData
       FieldName = 'SUBBLKTYP'
-      Index = 0
+      Index = 1
       LookupCache = False
       ProviderFlags = [pfInUpdate, pfInWhere]
       ReadOnly = False
@@ -943,7 +1011,7 @@ object shake7mainform: Tshake7mainform
       DisplayWidth = 5
       FieldKind = fkData
       FieldName = 'BLKNUMBER'
-      Index = 1
+      Index = 2
       LookupCache = False
       ProviderFlags = [pfInUpdate, pfInWhere]
       ReadOnly = False
@@ -954,7 +1022,7 @@ object shake7mainform: Tshake7mainform
       DisplayWidth = 10
       FieldKind = fkData
       FieldName = 'PASSWORD'
-      Index = 2
+      Index = 3
       LookupCache = False
       ProviderFlags = [pfInUpdate, pfInWhere]
       ReadOnly = False
@@ -964,7 +1032,7 @@ object shake7mainform: Tshake7mainform
       DisplayWidth = 20
       FieldKind = fkCalculated
       FieldName = 'BlockProtected'
-      Index = 3
+      Index = 4
       LookupCache = False
       ProviderFlags = [pfInUpdate, pfInWhere]
       ReadOnly = False
@@ -974,7 +1042,7 @@ object shake7mainform: Tshake7mainform
       DisplayWidth = 8
       FieldKind = fkData
       FieldName = 'USERNAME'
-      Index = 4
+      Index = 5
       LookupCache = False
       ProviderFlags = [pfInUpdate, pfInWhere]
       ReadOnly = False
@@ -985,7 +1053,7 @@ object shake7mainform: Tshake7mainform
       DisplayWidth = 8
       FieldKind = fkData
       FieldName = 'BLOCKFNAME'
-      Index = 5
+      Index = 6
       LookupCache = False
       ProviderFlags = [pfInUpdate, pfInWhere]
       ReadOnly = False
@@ -996,7 +1064,7 @@ object shake7mainform: Tshake7mainform
       DisplayWidth = 20
       FieldKind = fkCalculated
       FieldName = 'Block'
-      Index = 6
+      Index = 7
       LookupCache = False
       ProviderFlags = [pfInUpdate, pfInWhere]
       ReadOnly = False
@@ -1006,7 +1074,7 @@ object shake7mainform: Tshake7mainform
       DisplayWidth = 8
       FieldKind = fkData
       FieldName = 'BLOCKNAME'
-      Index = 7
+      Index = 8
       LookupCache = False
       ProviderFlags = [pfInUpdate, pfInWhere]
       ReadOnly = False
@@ -1017,7 +1085,7 @@ object shake7mainform: Tshake7mainform
       DisplayWidth = 10
       FieldKind = fkData
       FieldName = 'VERSION'
-      Index = 8
+      Index = 9
       LookupCache = False
       ProviderFlags = [pfInUpdate, pfInWhere]
       ReadOnly = False
@@ -1027,11 +1095,22 @@ object shake7mainform: Tshake7mainform
       DisplayWidth = 20
       FieldKind = fkCalculated
       FieldName = 'VersionDisplay'
-      Index = 9
+      Index = 10
       LookupCache = False
       ProviderFlags = [pfInUpdate, pfInWhere]
       ReadOnly = False
       Required = False
+    end
+    object BlocksLanguage: TStringField
+      DisplayWidth = 10
+      FieldKind = fkCalculated
+      FieldName = 'Language'
+      Index = 11
+      LookupCache = False
+      ProviderFlags = [pfInUpdate, pfInWhere]
+      ReadOnly = False
+      Required = False
+      Size = 10
     end
   end
   object MRUManager: TMRUManager
@@ -1064,6 +1143,12 @@ object shake7mainform: Tshake7mainform
   object MemBlocks: TMemDataset
     Active = True
     FieldDefs = <    
+      item
+        Name = 'BLKLANG'
+        DataType = ftString
+        Precision = 0
+        Size = 5
+      end    
       item
         Name = 'SUBBLKTYP'
         DataType = ftString
@@ -1129,6 +1214,12 @@ object shake7mainform: Tshake7mainform
         DataType = ftInteger
         Precision = 0
         Size = 0
+      end    
+      item
+        Name = 'Language'
+        DataType = ftString
+        Precision = -1
+        Size = 20
       end>
     left = 352
     top = 96

@@ -15,8 +15,6 @@ type
   TAboutForm = class(TForm)
     BitBtn1: TBitBtn;
     Memo1: TMemo;
-    procedure Label1Click(Sender: TObject);
-    procedure Memo1Change(Sender: TObject);
   private
     { private declarations }
   public
@@ -29,16 +27,6 @@ var
 implementation
 
 { TAboutForm }
-
-procedure TAboutForm.Label1Click(Sender: TObject);
-begin
-
-end;
-
-procedure TAboutForm.Memo1Change(Sender: TObject);
-begin
-
-end;
 
 initialization
   {$I about.lrs}
